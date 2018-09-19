@@ -61,6 +61,7 @@ exports.TruckSimulator = class {
           po_number: truck.trip.po_number,
           lat: truck.location.lat,
           lng: truck.location.lng,
+          angle: truck.location.angle,
         };
       });
       this.truckLocationsRef.set(truckLocations);
@@ -69,9 +70,22 @@ exports.TruckSimulator = class {
 
   getTruckPositionsAt(time) {
     function interpolate(before, after, proportion) {
+      let startPoint = {
+        x: before.lng,
+        y: before.lat
+      };
+      let endPoint = {
+        x: after.lng,
+        y: after.lat
+      };
+
+      let angleDeg = Math.atan2(endPoint.y - startPoint.y, -(endPoint.x - startPoint.x)) * 180 / Math.PI; 
+      angleDeg = (angleDeg + 270) % 360;
+      
       return {
         lat: before.lat * proportion + after.lat * (1 - proportion),
         lng: before.lng * proportion + after.lng * (1 - proportion),
+        angle: angleDeg,
       };
     }
 
