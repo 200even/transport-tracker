@@ -1,0 +1,5 @@
+stop_lon,stop_name,stop_lat,stop_id,location_type
+-94.143647,JB Hunt Headquarters,36.2455568,20,0
+-92.947754,Walt Disney Hometown Museum,39.715839,21,0
+-94.13505,Roofing Systems,36.20979,22,0
+

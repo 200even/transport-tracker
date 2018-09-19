@@ -1,61 +1,51 @@
-Google Transport Tracker
-========================
+Transport Tracker
+=================
 
-Google Transport Tracker is a set of applications designed to track a
+Transport Tracker is a set of applications designed to track a
 range of moving assets (such as vehicles) and visualize them on a live map. The
 applications use a mixture of technologies - Android, Firebase,
 Google Maps, GTFS (General Transit Feed Specification), and more.
 
-**Note:** This application implements asset tracking. For use in a production environment, you therefore need a [Google Maps APIs Premium Plan license](
-https://developers.google.com/maps/pricing-and-plans/). For more information, see the [Google Maps APIs terms of service](https://developers.google.com/maps/terms#section_10_4).
-
 ## Overview
 
-This is the open source release for the 
-[I/O Bus Tracker](https://io-bus-tracker.appspot.com/).
-
-The repository consists of a number of components, representing the individual
-moving parts of the bus tracking system. It includes an Android app,
-in `/android`, that's installed on Android devices and deployed on the tracked
-vehicles, along with a matching administration UI in `/admin`.
-
-The repo also contains the display side of the system, designed to drive 60"
-LCD TVs. There is `/backend`, written in Node.js and running on Google Compute
-Engine, which receives the locations reported by the Android app, along with a
+This project is written in Node.js and running on Google Compute
+Engine, which receives the locations reported by truck simulator along with a
 time table provided in GTFS format, and makes regular updates to a Firebase
-Real Time Database. The client in `/map` receives the updates from the Firebase
-database and draws them on the LCD TV.
+Real Time Database.
 
 ## Getting started
 
-See the [developer documentation](https://developers.google.com/maps/solutions/transport-tracker/start).
+###Set up a Firebase Realtime Database
+- Go to the Firebase console and click Add project to create a project for your Transport Tracker.
+- Enter a project name.
+- Click Create Project.
 
-## Directories in this repo
+###Get a Google Maps API Key
+https://cloud.google.com/maps-platform/#get-started
 
-The project contains the following subdirectories, each housing
-a single component:
+###Set up the backend
+1. Get your Firebase web app credentials:
+    - Go to the Firebase console and open your Firebase project.
+    - Click Add Firebase to your web app.
+    - Go to the Service Accounts tab in your Firebase project's settings.
+    - Click Generate New Private Key and confirm the action as prompted.
+    - Firebase downloads an adminsdk JSON file containing your service account credentials. Store this file for later use.
 
-### `admin`
+2. Edit the file serviceAccountKey.json, and paste in your Firebase adminsdk service account credentials from the file you downloaded earlier.
 
-A web interface for administrators to see a quick overview of all the
-assets being tracked.
+3. Edit the tracker_configuration.jsonfile and add the following values:
 
-### `android`
+    - mapsApiKey - your Maps API key. If you don't have one yet, follow the guide to getting an API key.
+    - databaseURL - the address of your Firebase Realtime Database. You can find the URL in the Admin SDK configuration snippet on the Firebase Service Accounts tab.
+    - simulation - a configuration setting that determines whether to use the vehicle simulator or real location data from the vehicle locator. While developing and testing, set this value to true.
 
-The Android app that resides with each asset to be tracked.
-Once configured, this app keeps its location synced with Firebase, and reports
-on other metrics, such as battery life.
+4. Install dependencies and run the application
+```angular2html
+    yarn install
+    yarn main
+```
+Open your Firebase Realtime Database to see the results
 
-### `backend`
-
-The server-side component that manages the state of the Firebase database.  For
-a tutorial on this component, please see 
+This project is based on an open source bus tracker. For
+if you have questions that aren't answered here, please see 
 [Transport Tracker Backend codelab](https://codelabs.developers.google.com/codelabs/transport-tracker-backend/)
-
-### `map`
-
-The public web interface that displays schedule information and asset
-locations. For a tutorial on this component, please see 
-[Transport Tracker Map codelab](https://codelabs.developers.google.com/codelabs/transport-tracker-map/)
-
-*This is not an official Google product.*

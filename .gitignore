@@ -59,3 +59,6 @@ android/app/google-services.json
 
 config.json
 node_modules
+
+backend/serviceAccountKey.json
+backend/tracker_configuration.json

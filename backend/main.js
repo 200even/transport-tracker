@@ -15,14 +15,8 @@
 
 /*eslint-disable unknown-require */
 const trackerConfig = require('./tracker_configuration.json');
-const Promise = require('bluebird');
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
-const panelConfig = require('./panels_config.json');
-const googleMapsClient = require('@google/maps').createClient({
-  key: trackerConfig.mapsApiKey,
-  Promise
-});
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -30,28 +24,44 @@ admin.initializeApp({
 });
 
 // Database references
-const busLocationsRef = admin.database().ref('bus-locations');
-const mapRef = admin.database().ref('map');
-const panelsRef = admin.database().ref('panels');
-const promoRef = admin.database().ref('promo');
+const truckLocationsRef = admin.database().ref('truck-locations');
 const timeRef = admin.database().ref('current-time');
+const stopsRef = admin.database().ref('stops');
 
 // Library classes
 const {GTFS} = require('./gtfs.js');
 const {HeartBeat} = require('./heart_beat.js');
-const {PanelChanger} = require('./panel_changer.js');
-const {PromoChanger} = require('./promo_changer.js');
-const {TimeTable} = require('./time_table.js');
 
 const gtfs = new GTFS();
 new HeartBeat(timeRef, trackerConfig.simulation);
-new TimeTable(timeRef, panelsRef, gtfs, panelConfig, googleMapsClient);
-new PanelChanger(mapRef, panelConfig);
-new PromoChanger(promoRef);
 if (trackerConfig.simulation) {
-  const {BusSimulator} = require('./bus_simulator.js');
+  const {TruckSimulator} = require('./truck_simulator.js');
   const generatedPaths = require('./paths.json');
-  new BusSimulator(timeRef, gtfs, busLocationsRef, generatedPaths);
+  generateStopsWithOrderNumbers(gtfs).then((stops) => {
+    stopsRef.set(stops);
+  });
+  new TruckSimulator(timeRef, gtfs, truckLocationsRef, generatedPaths);
 } else {
   // Exercise for the reader: integrate real bus location data
+}
+
+async function generateStopsWithOrderNumbers (gtfs) {
+  const [ stops, stopTimes, trips ] = await Promise.all([gtfs.getTruckStops(), gtfs.getTruckStopTimes(), gtfs.getTruckTrips()]);
+  // trips have the PO numbers
+  //stop times have trips and stops
+  stopTimes.forEach((stopTime) => {
+    const tripId = stopTime.trip_id;
+    const stopId = stopTime.stop_id;
+    const trip = trips.find(trip => {
+      return trip.trip_id === tripId;
+    });
+    console.log('trip', trip);
+    const stop = stops.find(stop => {
+      return stop.stop_id === stopId;
+    });
+    if (!stop.poNumbers) stop.poNumbers = [];
+    stop.poNumbers.push(trip.po_number)
+  });
+  console.log('stops', stops);
+  return stops;
 }
